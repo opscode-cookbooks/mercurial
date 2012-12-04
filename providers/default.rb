@@ -2,19 +2,19 @@ action :sync do
   ::File.delete(hgupFile) if ::File.exist?(hgupFile)
   execute "sync repository #{new_resource.path}" do    
     not_if "hg identify #{new_resource.path}"
-    command "hg clone --rev #{new_resource.reference} #{hgConnectionCommand} #{new_resource.repository} #{new_resource.path} && touch #{hgupFile}"
+    command "hg clone --rev #{new_resource.reference} #{hg_connection_command} #{new_resource.repository} #{new_resource.path} && touch #{hgupFile}"
     creates hgupFile
     notifies :run, "execute[set ownership]"
     notifies :run, "execute[set permissions]"
   end
   execute "check incoming changes" do
-    command "hg incoming --rev #{new_resource.reference} #{hgConnectionCommand}  #{new_resource.repository} && touch #{hgupFile} || true"
+    command "hg incoming --rev #{new_resource.reference} #{hg_connection_command}  #{new_resource.repository} && touch #{hgupFile} || true"
     cwd new_resource.path
     creates hgupFile
     notifies :run, "execute[pull]"
   end
   execute "pull" do
-    command "hg pull --rev #{new_resource.reference} #{hgConnectionCommand} #{new_resource.repository}"
+    command "hg pull --rev #{new_resource.reference} #{hg_connection_command} #{new_resource.repository}"
     cwd new_resource.path
     only_if { ::File.exist?(hgupFile) }
     action :nothing
@@ -46,7 +46,7 @@ end
 action :clone do
   ::File.delete(hgupFile) if ::File.exist?(hgupFile)
   execute "clone repository #{new_resource.path}" do
-    command "hg clone --rev #{new_resource.reference} #{hgConnectionCommand} #{new_resource.repository} #{new_resource.path} && touch #{hgupFile}"
+    command "hg clone --rev #{new_resource.reference} #{hg_connection_command} #{new_resource.repository} #{new_resource.path} && touch #{hgupFile}"
     not_if "hg identify #{new_resource.path}"
     creates hgupFile
     notifies :run, "execute[set permission]"
