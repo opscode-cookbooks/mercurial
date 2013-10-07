@@ -25,6 +25,6 @@ when "windows"
   end
 else
   package "mercurial" do
-    action :upgrade
+    action :install
   end
 end
