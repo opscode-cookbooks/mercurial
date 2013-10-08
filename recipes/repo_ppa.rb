@@ -1,8 +1,8 @@
 #
 # Cookbook Name:: mercurial
-# Recipe:: package
+# Recipe:: repo_ppa
 #
-# Copyright 2009, Opscode, Inc.
+# Copyright 2013, Optiflows
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,16 +17,12 @@
 # limitations under the License.
 #
 
-include_recipe "mercurial::repo_#{node['hg']['repo']}" if node['hg']['repo']
+include_recipe "apt"
 
-case node['platform']
-when "windows"
-  windows_package "Mercurial" do
-    source node['hg']['windows_url']
-    action :install
-  end
-else
-  package "mercurial" do
-    action :upgrade
-  end
+apt_repository "mercurial" do
+  uri          node['hg']['ppa']['uri']
+  distribution node['lsb']['codename']
+  components   ['main']
+  keyserver    'keyserver.ubuntu.com'
+  key          node['hg']['ppa']['key']
 end
