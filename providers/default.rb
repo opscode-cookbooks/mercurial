@@ -42,9 +42,8 @@ end
 action :clone do
   ::File.delete(hgup_file) if ::File.exist?(hgup_file)
   execute "clone repository #{new_resource.path}" do
-    command "hg clone --rev #{new_resource.reference} #{hg_connection_command} #{new_resource.repository} #{new_resource.path} && touch #{hgup_file}"
+    command "hg clone --rev #{new_resource.reference} #{hg_connection_command} #{new_resource.repository} #{new_resource.path}"
     not_if "hg identify #{new_resource.path}"
-    creates hgup_file
     notifies :run, "execute[set permission #{new_resource.path}]"
     notifies :run, "execute[set ownership #{new_resource.path}]"
   end
