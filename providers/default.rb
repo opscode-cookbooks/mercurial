@@ -53,6 +53,7 @@ action :clone do
   end
   execute "set permission #{new_resource.path}" do
     command "chmod -R #{new_resource.mode} #{new_resource.path}"
+    action :nothing
     only_if { new_resource.mode }
   end
 end
