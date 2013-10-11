@@ -10,5 +10,5 @@ when "windows"
   default['hg']['version'] = "2.4.0"
   default['hg']['windows_url'] = "http://mercurial.selenic.com/release/windows/mercurial-#{node['hg']['version']}-#{node['hg']['windows_arch']}.msi"
 when "ubuntu"
-  default['hg']['repo'] = "ppa"
+  default['hg']['repo'] = nil # Can be "ppa"
 end
