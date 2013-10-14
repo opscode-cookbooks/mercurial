@@ -51,17 +51,17 @@ def sync
 end
 
 def load_current_resource
+  init
   @current_resource = Chef::Resource::Mercurial.new(@new_resource.name)
   @current_resource.name(@new_resource.name)
   @current_resource.path(@new_resource.path)
-  if repo_exist?
+  if repo_exists?
     @current_resource.exists = true
-    @current_resource.synced = true unless repo_incoming?
+    @current_resource.synced = !repo_incoming?
   end
-  init
 end
 
-def repo_exist?
+def repo_exists?
   command = Mixlib::ShellOut.new("hg identify #{new_resource.path}").run_command
   Chef::Log.debug "'hg identify #{new_resource.path}' return #{command.stdout}"
   return command.exitstatus == 0
@@ -79,7 +79,7 @@ def init
     owner new_resource.owner
     group new_resource.group
     recursive true
-    mode 0644
+    mode 0755
   end
 end
 
