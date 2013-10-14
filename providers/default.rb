@@ -7,7 +7,7 @@ end
 
 action :sync do
   if current_resource.synced
-    Chef::Log.info "#{ new_resource } already exists - nothing to do."
+    Chef::Log.info "#{ new_resource } already synced - nothing to do."
   elsif current_resource.exists
     converge_by("Sync #{ @new_resource }") do
       sync
@@ -62,12 +62,16 @@ def load_current_resource
 end
 
 def repo_exist?
-  Mixlib::ShellOut.new("hg identify #{new_resource.path}").run_command.exitstatus == 0 
+  command = Mixlib::ShellOut.new("hg identify #{new_resource.path}").run_command
+  Chef::Log.debug "'hg identify #{new_resource.path}' return #{command.stdout}"
+  return command.exitstatus == 0
 end
 
 def repo_incoming?
   cmd = "hg incoming --rev #{new_resource.reference} #{hg_connection_command} --bundle #{bundle_file} #{new_resource.repository}"
-  Mixlib::ShellOut.new(cmd, :cwd => new_resource.path, :user => new_resource.owner, :group => new_resource.group).run_command.exitstatus == 0
+  command = Mixlib::ShellOut.new(cmd, :cwd => new_resource.path, :user => new_resource.owner, :group => new_resource.group).run_command
+  Chef::Log.debug "#{cmd} return #{command.stdout}"
+  return command.exitstatus == 0
 end
 
 def init
