@@ -44,9 +44,12 @@ def sync
     user new_resource.owner
     group new_resource.group
     cwd new_resource.path
+    only_if { ::File.exists?(bundle_file) || repo_incoming? }
+    notifies :delete, "file[#{bundle_file}]"
   end
+
   file bundle_file do
-    action :delete
+    action :nothing
   end
 end
 
