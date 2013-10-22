@@ -17,8 +17,6 @@
 # limitations under the License.
 #
 
-include_recipe "apt"
-
 apt_repository "mercurial" do
   uri          node['hg']['ppa']['uri']
   distribution node['lsb']['codename']
