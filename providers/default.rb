@@ -13,9 +13,8 @@ action :sync do
       sync
     end
   else
-    converge_by("Clone and sync #{ @new_resource }") do
+    converge_by("Clone #{ @new_resource }") do
       clone
-      sync
     end
   end
 end
@@ -32,10 +31,11 @@ end
 
 def clone
   execute "clone repository #{new_resource.path}" do
-    command "hg clone --rev #{new_resource.reference} #{hg_connection_command} #{new_resource.repository} #{new_resource.path}"
+    command "hg clone #{hg_connection_command} #{new_resource.repository} #{new_resource.path}"
     user new_resource.owner
     group new_resource.group
   end
+  update
 end
 
 def sync
@@ -47,9 +47,19 @@ def sync
     only_if { ::File.exists?(bundle_file) || repo_incoming? }
     notifies :delete, "file[#{bundle_file}]"
   end
+  update
 
   file bundle_file do
     action :nothing
+  end
+end
+
+def update
+  execute "hg update for #{new_resource.path}" do
+    command "hg update --rev #{new_resource.reference}"
+    user new_resource.owner
+    group new_resource.group
+    cwd new_resource.path
   end
 end
 
