@@ -1,4 +1,6 @@
 default['hg']['install_method'] = 'package'
+default['hg']['use_repoforge'] = true
+
 case node['platform']
 when "windows"
   case  node['kernel']['machine']

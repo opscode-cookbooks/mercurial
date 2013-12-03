@@ -24,7 +24,10 @@ when "windows"
     action :install
   end
 else
+  include_recipe 'yum::repoforge' if platform_family?('rhel') && node['hg']['use_repoforge']
+
   package "mercurial" do
+    options '-y --enablerepo=rpmforge-extras' if platform_family?('rhel') && node['hg']['use_repoforge']
     action :upgrade
   end
 end
