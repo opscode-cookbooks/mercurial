@@ -19,7 +19,7 @@
 
 case node['platform']
 when "windows"
-  windows_package "Mercurial" do
+  windows_package node['hg']['windows_package'] do
     source node['hg']['windows_url']
     action :install
   end
