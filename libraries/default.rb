@@ -7,7 +7,8 @@ def hg_connection_command
   when "windows"
     cmd = ""
   else
-    cmd = "--ssh 'ssh -i #{new_resource.key} -o StrictHostKeyChecking=no'"
+    key_param = new_resource.key.nil? ? "" : "-i #{new_resource.key}"
+    cmd = "--ssh 'ssh #{key_param} -o StrictHostKeyChecking=no'"
   end
   return cmd
 end
