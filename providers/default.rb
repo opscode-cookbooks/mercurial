@@ -6,16 +6,10 @@ def whyrun_supported?
 end
 
 action :sync do
-  if current_resource.synced
+  if current_resource.synced and current_resource.updated
     Chef::Log.info "#{ new_resource } already synced - nothing to do."
-  elsif current_resource.exists
-    converge_by("Sync #{ @new_resource }") do
-      sync
-    end
   else
-    converge_by("Clone #{ @new_resource }") do
-      clone
-    end
+    sync_action
   end
 end
 
@@ -23,9 +17,13 @@ action :clone do
   if current_resource.exists
     Chef::Log.info "#{ new_resource } already exists - nothing to do."
   else
-    converge_by("Clone #{ @new_resource }") do
-      clone
-    end
+    clone_action
+  end
+end
+
+def clone_action
+  converge_by("Clone #{ @new_resource }") do
+    clone
   end
 end
 
@@ -36,6 +34,16 @@ def clone
     group new_resource.group
   end
   update
+end
+
+def sync_action
+  if current_resource.exists
+    converge_by("Sync #{ @new_resource }") do
+      sync
+    end
+  else
+    clone_action
+  end
 end
 
 def sync
@@ -71,6 +79,7 @@ def load_current_resource
   if repo_exists?
     @current_resource.exists = true
     @current_resource.synced = !repo_incoming?
+    @current_resource.updated = repo_updated?
   end
 end
 
@@ -81,10 +90,24 @@ def repo_exists?
 end
 
 def repo_incoming?
-  cmd = "hg incoming --rev #{new_resource.reference} #{hg_connection_command} --bundle #{bundle_file} #{new_resource.repository}"
+  cmd = "hg incoming #{hg_connection_command} --bundle #{bundle_file} #{new_resource.repository}"
   command = Mixlib::ShellOut.new(cmd, :cwd => new_resource.path, :user => new_resource.owner, :group => new_resource.group).run_command
   Chef::Log.debug "#{cmd} return #{command.stdout}"
   return command.exitstatus == 0
+end
+
+def repo_updated?
+  cmd_current_revision = "hg parent --template '{node}'"
+  command = Mixlib::ShellOut.new(cmd_current_revision, :cwd => new_resource.path).run_command
+  Chef::Log.debug "#{cmd_current_revision} return #{command.stdout}"
+  current_revision = command.stdout
+
+  cmd_desired_revision = "hg log --rev #{new_resource.reference} --template '{node}'"
+  command = Mixlib::ShellOut.new(cmd_desired_revision, :cwd => new_resource.path).run_command
+  Chef::Log.debug "#{cmd_desired_revision} return #{command.stdout}"
+  desired_revision = command.stdout
+
+  return current_revision == desired_revision
 end
 
 def init
