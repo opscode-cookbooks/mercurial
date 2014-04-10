@@ -1,4 +1,4 @@
-actions :sync, :clone
+actions :clean, :sync, :clone
 
 default_action :sync
 
@@ -10,4 +10,4 @@ attribute :owner, :kind_of => String
 attribute :group, :kind_of => String
 attribute :mode, :kind_of => String
 
-attr_accessor :exists, :synced, :updated
+attr_accessor :exists, :synced, :clean, :updated

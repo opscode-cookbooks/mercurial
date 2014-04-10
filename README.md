@@ -53,7 +53,8 @@ mercurial
 ### Actions
 
 - :clone - this will simply issue a clone of the repository at the revision specified (default tip).
-- :sync -  this will issue a clone of the repository if there is nothing at the path specified, otherwise a pull and update will be issued to bring the directory up-to-date.
+- :sync -  this will issue a clone of the repository if there is nothing at the path specified, otherwise a pull and update to the specifed reference will be issued to bring the directory up-to-date.
+- :clean - this will clean out all local modifications at the path specified
 
 ### Parameter Attributes
 
