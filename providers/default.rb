@@ -59,19 +59,13 @@ def sync_action
 end
 
 def sync
-  execute "pull #{new_resource.path}" do
-    command "hg unbundle -u #{bundle_file}"
+  execute "pull #{new_resource.path} from #{new_resource.repository}" do
+    command "hg pull #{hg_connection_command} #{new_resource.repository}"
     user new_resource.owner
     group new_resource.group
     cwd new_resource.path
-    only_if { ::File.exists?(bundle_file) || repo_incoming? }
-    notifies :delete, "file[#{bundle_file}]"
   end
   update
-
-  file bundle_file do
-    action :nothing
-  end
 end
 
 def update
@@ -100,7 +94,6 @@ def clean
 end
 
 def load_current_resource
-  init
   @current_resource = Chef::Resource::Mercurial.new(@new_resource.name)
   @current_resource.name(@new_resource.name)
   @current_resource.path(@new_resource.path)
@@ -119,8 +112,10 @@ def repo_exists?
 end
 
 def repo_incoming?
-  cmd = "hg incoming #{hg_connection_command} --bundle #{bundle_file} #{new_resource.repository}"
-  command = Mixlib::ShellOut.new(cmd, :cwd => new_resource.path, :user => new_resource.owner, :group => new_resource.group).run_command
+  cmd = "hg incoming #{hg_connection_command} #{new_resource.repository}"
+  command = Mixlib::ShellOut.new(
+      cmd, :cwd => new_resource.path, :user => new_resource.owner,
+      :group => new_resource.group).run_command
   Chef::Log.debug "#{cmd} return #{command.stdout}"
   return command.exitstatus == 0
 end
@@ -144,25 +139,4 @@ def repo_updated?
   desired_revision = command.stdout
 
   return current_revision == desired_revision
-end
-
-def init
-  directory tmp_directory do
-    owner new_resource.owner
-    group new_resource.group
-    recursive true
-    mode 0755
-  end
-end
-
-def tmp_directory
-  ::File.join(Chef::Config[:file_cache_path], "mercurial", sanitize_filename(new_resource.path))
-end
-
-def bundle_file
-  ::File.join(tmp_directory, "bundle")
-end
-
-def sanitize_filename(filename)
-  filename.gsub(/[^0-9A-z.\-]/, '_')
 end
