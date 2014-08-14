@@ -18,4 +18,4 @@ end
 depends           "windows"
 depends           "python"
 depends           "build-essential"
-depends           "yum"
+depends           "yum-repoforge", "~> 0.3"
