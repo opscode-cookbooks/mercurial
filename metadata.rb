@@ -7,6 +7,10 @@ version           "2.0.5"
 
 recipe "mercurial", "Installs mercurial"
 
+%w{ redhat centos scientific amazon }.each do |os|
+  supports os, '>= 5.0'
+end
+
 %w{ debian ubuntu windows }.each do |os|
   supports os
 end
@@ -14,3 +18,4 @@ end
 depends           "windows"
 depends           "python"
 depends           "build-essential"
+depends           "yum-repoforge", "~> 0.3"
